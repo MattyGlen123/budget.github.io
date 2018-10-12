@@ -1,0 +1,32 @@
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit; /* makes border and padding included in width */
+}
+
+html {
+  font-size: 92.5%; 
+  /*
+  100% = 16px
+  62.5% equivalent to 10px = 1rem 
+
+  */
+
+  @include respond(tab-land) { // width < 1200px
+    font-size: 56.25%; // 1rem = 9px, 9/16 = 56.25%
+  }
+
+  @include respond(tab-port) { // width < 900px
+    font-size: 50%; // 1rem = 8px, 8/16 = 50%
+  }
+
+  @include respond(desktop) { // width > 1200px++
+    font-size: 75%; //1rem = 12, 12/16px
+  }
+}
+
+body {
+  box-sizing: border-box;
+}
