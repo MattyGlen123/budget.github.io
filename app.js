@@ -66,7 +66,9 @@ const UIController = (function() {
     inputType: '.add__type',
     inputDescription: '.add__description',
     inputAmount: '.add__value',
-    btnAdd: '.add__btn'
+    btnAdd: '.add__btn',
+    incomeContainer: '.income__list',
+    expensesContainer: '.expenses__list'
   };
 
   return {
@@ -76,6 +78,22 @@ const UIController = (function() {
         description: document.querySelector(DOMStrings.inputDescription).value,
         amount: document.querySelector(DOMStrings.inputAmount).value
       };
+    },
+
+    addListItem: function(obj, type) {
+      let html, element;
+      // create html using placeholder text and add obj values
+      if(type === 'inc') {
+        element = DOMStrings.incomeContainer; //assign dom string to element
+        html = `<div class="item" id="income-${obj.id}"><div class="item__description">${obj.description}</div><div class="right "><div class="item__value">${obj.value}</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
+      } else if(type === 'exp') {
+        element = DOMStrings.expensesContainer; //assign dom string to element
+        html = `<div class="item " id="expense-${obj.id}"><div class="item__description">${obj.description}</div><div class="right"><div class="item__value">${obj.value}</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
+      }
+
+      //insert html into the dom
+      document.querySelector(element).insertAdjacentHTML('beforeend', html);
+
     },
 
     getDOMStrings: function() { //expose DOM strings into controller
@@ -114,7 +132,7 @@ const controller = (function(budgetCtrl, UICntrl) {
   newItem = budgetCtrl.addItem(input.type, input.description, input.amount);
 
   // 3. add item to UI
-
+  UICntrl.addListItem(newItem, input.type);
 
   // 4. calc the budget
 
