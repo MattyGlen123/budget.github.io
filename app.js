@@ -96,6 +96,19 @@ const UIController = (function() {
 
     },
 
+    clearFields: function() {
+      let fields;
+
+      // get the description and value input fields
+      fields = Array.from(document.querySelectorAll(`${DOMStrings.inputDescription}, ${DOMStrings.inputAmount}`));
+      
+      // reset the input fields to empty
+      fields.forEach(cur => cur.value = '');
+
+      // reset the focus back to the descriptions
+      fields[0].focus();
+    },
+
     getDOMStrings: function() { //expose DOM strings into controller
       return DOMStrings;
     } 
@@ -135,7 +148,7 @@ const controller = (function(budgetCtrl, UICntrl) {
   UICntrl.addListItem(newItem, input.type);
 
   // 4. calc the budget
-
+  UICntrl.clearFields();
 
   // 5. display budget
 
