@@ -71,8 +71,14 @@ const budgetController = (function() {
       //calc the budget by do income - expenses, then store the budget back in the data object
       data.budget = data.totals.inc - data.totals.exp;
 
-      //calc the percentage of the income we spent, to display next to expenses 
-      data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+console.log(data.percentage);
+      if(data.totals.inc > 0) {
+        //calc the percentage of the income we spent, to display next to expenses 
+        data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+      } else  {
+        data.percentage = -1; // 
+      }
+
     },
 
     // function will return an object which holds 4 values from the data object.
@@ -103,7 +109,11 @@ const UIController = (function() {
     inputAmount: '.add__value',
     btnAdd: '.add__btn',
     incomeContainer: '.income__list',
-    expensesContainer: '.expenses__list'
+    expensesContainer: '.expenses__list',
+    budgetLabel: ".budget__value",
+    incomeLabel: ".budget__income--value",
+    expensesLabel: ".budget__expenses--value",
+    percentageLabel: ".budget__expenses--percentage"
   };
 
   return {
@@ -144,6 +154,20 @@ const UIController = (function() {
       fields[0].focus();
     },
 
+    displayBudget:function(obj) { // recives the budget, total income, total expenses and percentage 
+      
+      document.querySelector(DOMStrings.budgetLabel).textContent = obj.budget;
+      document.querySelector(DOMStrings.incomeLabel).textContent = obj.totalInc;
+      document.querySelector(DOMStrings.expensesLabel).textContent = obj.totalExp;
+      
+      // display the percentage only it's positive
+      if(obj.percentage > 0) {
+        document.querySelector(DOMStrings.percentageLabel).textContent = obj.percentage + "%";
+      } else {
+        document.querySelector(DOMStrings.percentageLabel).textContent = "--";
+      }
+    },
+
     getDOMStrings: function() { //expose DOM strings into controller
       return DOMStrings;
     } 
@@ -178,7 +202,7 @@ const controller = (function(budgetCtrl, UICntrl) {
       let budget = budgetCtrl.getBudget();
 
     // 3. display budget
-    console.log(budget);
+    UICntrl.displayBudget(budget);
   }
 
 
@@ -208,6 +232,7 @@ const controller = (function(budgetCtrl, UICntrl) {
 return {
   init: function() {
     console.log('The application has started');
+    UICntrl.displayBudget(); // reset everything to 0
     setupEventListeners();
   }
 }
