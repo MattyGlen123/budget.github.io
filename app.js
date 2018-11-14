@@ -62,6 +62,18 @@ const budgetController = (function() {
 
     },
     
+    deleteItem: function(type, id) {
+      
+      let ids = data.allItems[type].map(item => item.id);
+
+      let index = ids.indexOf(id);
+
+      if(index !== -1) {
+        data.allItems[type].splice(index, 1);
+      }
+
+    },
+
     calculateBudget:function() {
 
       // calls a private functions that add up all the incomes and expenses and stores then inside the data object.
@@ -71,7 +83,6 @@ const budgetController = (function() {
       //calc the budget by do income - expenses, then store the budget back in the data object
       data.budget = data.totals.inc - data.totals.exp;
 
-console.log(data.percentage);
       if(data.totals.inc > 0) {
         //calc the percentage of the income we spent, to display next to expenses 
         data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
@@ -82,7 +93,7 @@ console.log(data.percentage);
     },
 
     // function will return an object which holds 4 values from the data object.
-    getBudget:function() {
+    getBudget: function() {
       return {
         budget: data.budget,
         totalInc: data.totals.inc,
@@ -113,7 +124,8 @@ const UIController = (function() {
     budgetLabel: ".budget__value",
     incomeLabel: ".budget__income--value",
     expensesLabel: ".budget__expenses--value",
-    percentageLabel: ".budget__expenses--percentage"
+    percentageLabel: ".budget__expenses--percentage",
+    container: ".container"
   };
 
   return {
@@ -130,15 +142,21 @@ const UIController = (function() {
       // create html using placeholder text and add obj values
       if(type === 'inc') {
         element = DOMStrings.incomeContainer; //assign dom string to element
-        html = `<div class="item" id="income-${obj.id}"><div class="item__description">${obj.description}</div><div class="right "><div class="item__value">${obj.value}</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
+        html = `<div class="item" id="inc-${obj.id}"><div class="item__description">${obj.description}</div><div class="right "><div class="item__value">${obj.value}</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
       } else if(type === 'exp') {
         element = DOMStrings.expensesContainer; //assign dom string to element
-        html = `<div class="item " id="expense-${obj.id}"><div class="item__description">${obj.description}</div><div class="right"><div class="item__value">${obj.value}</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
+        html = `<div class="item " id="exp-${obj.id}"><div class="item__description">${obj.description}</div><div class="right"><div class="item__value">${obj.value}</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn">X</button></div></div></div>`
       }
 
       //insert html into the dom
       document.querySelector(element).insertAdjacentHTML('beforeend', html);
 
+    },
+
+    // pass in id as apears in DOM eg inc-1
+    deleteListItem: function(selectorID) {
+      let element = document.getElementById(selectorID);
+      element.parentNode.removeChild(element);
     },
 
     clearFields: function() {
@@ -154,8 +172,8 @@ const UIController = (function() {
       fields[0].focus();
     },
 
-    displayBudget:function(obj) { // recives the budget, total income, total expenses and percentage 
-      
+    displayBudget: function(obj) { // recives the budget, total income, total expenses and percentage 
+
       document.querySelector(DOMStrings.budgetLabel).textContent = obj.budget;
       document.querySelector(DOMStrings.incomeLabel).textContent = obj.totalInc;
       document.querySelector(DOMStrings.expensesLabel).textContent = obj.totalExp;
@@ -191,6 +209,8 @@ const controller = (function(budgetCtrl, UICntrl) {
         ctrlAddItem();
       }
     });
+
+    document.querySelector(DOMStr.container).addEventListener('click', ctrlDeleteItem);
   }
 
   const updateBudget = function() { // called each time we enter a new item into the user interface
@@ -199,7 +219,7 @@ const controller = (function(budgetCtrl, UICntrl) {
     budgetCtrl.calculateBudget();
 
     // 2. gets an object containing the budget, total income, total expense and percentage  
-      let budget = budgetCtrl.getBudget();
+    let budget = budgetCtrl.getBudget();
 
     // 3. display budget
     UICntrl.displayBudget(budget);
@@ -227,12 +247,38 @@ const controller = (function(budgetCtrl, UICntrl) {
       // calculate and update the budget
       updateBudget();
     }
-  }
+  };
+
+  const ctrlDeleteItem = function(event) {
+    // when delete is clicked store id of item container eg income-0
+    let itemID = event.target.parentNode.parentNode.parentNode.id;
+
+    if(itemID) {
+      // eg splitID = ['inc', '1']
+      let splitID = itemID.split('-');
+      let type = splitID[0];
+      let ID = parseInt(splitID[1]);
+
+      // 1. delete the item from the data structure
+      budgetCtrl.deleteItem(type, ID);
+
+      // 2. remove the item from the ui
+      UICntrl.deleteListItem(itemID);
+
+      // 3. update and show new budget
+      updateBudget();
+    }
+  };
 
 return {
   init: function() {
     console.log('The application has started');
-    UICntrl.displayBudget(); // reset everything to 0
+    UICntrl.displayBudget({
+      budget: 0,
+      totalInc: 0,
+      totalExp: 0,
+      percentage: -1
+    }); // reset everything to 0
     setupEventListeners();
   }
 }
